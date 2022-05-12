@@ -1,0 +1,79 @@
+@startuml FIX_ER_Diagram
+' https://www.onixs.biz/fix-dictionary/4.2/compblock_standardheader.html
+
+entity Order {
+    * SenderCompID @49 VARCHAR
+    * ClOrdId @11 VARCHAR
+    OrderQty @38 INT
+    Side @54 INT
+    Symbol @55 VARCHAR
+    SecurityExchange @207 VARCHAR
+}
+
+entity Transaction {
+    * SenderCompID @49 VARCHAR
+    * TargetCompID @56 VARCHAR
+    * MsgSeqNum @34 INT
+
+    MsgType @35 CHAR
+    ClOrdId @11 VARCHAR
+    SendingTime @52 datetime[UTC]
+    TransactTime @60 optional[datetime[UTC]]
+}
+
+entity MessageTypeD {
+    * SenderCompID
+    * TargetCompID
+    * MsgSeqNum
+    ... Data relative to type D
+    TimeInForce @59 INT
+    OnBehalfOfCompID @115 VARCHAR
+    
+}
+entity MessageType8 {
+    * SenderCompID
+    * TargetCompID
+    * MsgSeqNum
+    ... Data relative to type D
+    CumQty @14 INT
+    OrdStatus @39 CHAR
+    
+}
+entity MessageTypeF {
+    * SenderCompID
+    * TargetCompID
+    * MsgSeqNum
+    ... Data relative to type D
+    OrderId @37 VARCHAR
+    ClOrdID @41 VARCHAR
+    
+}
+
+
+Transaction }|--|{ MessageTypeD
+Transaction }|--|{ MessageType8
+Transaction }|--|{ MessageTypeF
+
+entity Company {
+    * CompId @49 or @56 VARCHAR
+    LocationID @283 VARCHAR
+}
+
+entity Location {
+    * LocationId @283 VARCHAR
+    * Address VARCHAR
+}
+
+Order }|--|{ Company
+Transaction }|--|{ Order
+Transaction }|--|{ Company
+Company }|--|{ Location
+
+
+note top of Transaction
+    General Notes:
+    CheckSum attributes (@9/@10) can be ignored as we will store the uncrypted message
+    Useful for the parsing only
+    Only few data linked to message (D|F|8) implemented in current schema
+end note
+@enduml
